@@ -1,5 +1,5 @@
-import copy
 import pygame
+from random import randint
 
 
 class Board:
@@ -15,7 +15,7 @@ class Board:
         self.cw = pygame.Color('white')
         self.cb = pygame.Color('black')
 
-# настройка внешнего вида
+    # настройка внешнего вида
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top
@@ -25,12 +25,12 @@ class Board:
         for x, line in enumerate(self.board):
             for y, cell in enumerate(line):
                 screen.fill(self.cw, (self.left + y * self.cell_size,
-                                 self.top + x * self.cell_size,
-                                 self.cell_size, self.cell_size))
+                                      self.top + x * self.cell_size,
+                                      self.cell_size, self.cell_size))
                 if cell == 0:
                     screen.fill(self.cb, (self.left + y * self.cell_size + 1,
-                                     self.top + x * self.cell_size + 1,
-                                     self.cell_size - 2, self.cell_size - 2))
+                                          self.top + x * self.cell_size + 1,
+                                          self.cell_size - 2, self.cell_size - 2))
 
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
@@ -56,72 +56,68 @@ class Board:
             self.board[cell_coord[1]][cell_coord[0]] = not self.board[cell_coord[1]][cell_coord[0]]
 
 
-class Life(Board):
-    def __init__(self):
-        super().__init__(30, 30, left=10, top=10, cell_size=20)
-        self.cg = pygame.Color('green')
-        self.life = False
+class Miner(Board):
+    def __init__(self, x=10, y=15, mines=10):
+        super().__init__(x, y, cell_size=40)
+        self.board = [[-1] * x for _ in range(y)]
+        self.cr = pygame.Color('red')
+        tmp = set()
+        while len(tmp) < mines:
+            tmp.add((randint(0, x - 1), randint(0, y - 1)))
+        for x, y in tmp:
+            self.board[y][x] = 10
 
-    def set_life(self):
-        self.life = not self.life
-        return self.life
-
-    def on_click(self, cell_coord):
-        if not self.life:
-            self.invert(cell_coord)
-
-    def render(self, screen):
+    def render(self, screen: pygame.Surface):
         for x, line in enumerate(self.board):
             for y, cell in enumerate(line):
                 screen.fill(self.cw, (self.left + y * self.cell_size,
                                       self.top + x * self.cell_size,
                                       self.cell_size, self.cell_size))
-                if cell == 0:
+                if cell == -1:
                     screen.fill(self.cb, (self.left + y * self.cell_size + 1,
                                           self.top + x * self.cell_size + 1,
                                           self.cell_size - 2, self.cell_size - 2))
-                else:
-                    screen.fill(self.cg, (self.left + y * self.cell_size + 1,
+                elif cell == 10:
+                    screen.fill(self.cr, (self.left + y * self.cell_size + 1,
                                           self.top + x * self.cell_size + 1,
                                           self.cell_size - 2, self.cell_size - 2))
+                else:
+                    screen.fill(self.cb, (self.left + y * self.cell_size + 1,
+                                          self.top + x * self.cell_size + 1,
+                                          self.cell_size - 2, self.cell_size - 2))
+                    font = pygame.font.Font(None, 40)
+                    text = font.render(str(self.board[x][y]), False , self.cw)
+                    screen.blit(text, (self.left + y * self.cell_size + 10,
+                                self.top + x * self.cell_size + 10))
 
-    def next_move(self):
+    def on_click(self, cell_coord):
+        if not cell_coord:
+            return
+        x, y = cell_coord
+
         def get_state(x, y):
-            x %= self.width
-            y %= self.height
-            return self.board[y][x]
+            if 0 <= x < self.width and 0 <= y < self.height:
+                return self.board[y][x] == 10
+            else:
+                return 0
 
-        if self.life:
-            new_board = copy.deepcopy(self.board)
-            for x in range(self.width):
-                for y in range(self.height):
-                    st = 0
-                    for dx in range(-1, 2):
-                        for dy in range(-1, 2):
-                            st += get_state(x + dx, y + dy)
-                    st -= get_state(x, y)
-                    if st == 3:
-                        new_board[y][x] = 1
-                    elif st != 2:
-                        new_board[y][x] = 0
-
-            self.board = new_board
-
-
+        if self.board[y][x] != 10:
+            st = 0
+            for dx in range(-1, 2):
+                for dy in range(-1, 2):
+                    st += get_state(x + dx, y + dy)
+            self.board[y][x] = st
 
 
 
 pygame.init()
-size = width, heigt = (620, 620)
+size = width, heigt = (520, 620)
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Жизнь')
-board = Life()
+pygame.display.set_caption('Сапёр')
+board = Miner()
 running = True
-life = False
 clock = pygame.time.Clock()
 fps = 100
-step = 40
-d_step = 0
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -129,22 +125,9 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 board.get_click(event.pos)
-            if event.button == 3:
-                board.set_life()
-            if event.button == 4:
-                step = max(10, step - 1)
-            if event.button == 5:
-                step += 1
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            board.set_life()
-
-    if d_step > step:
-        board.next_move()
-        d_step = 0
     screen.fill((0, 0, 0))
     board.render(screen)
 
     pygame.display.flip()
     clock.tick(fps)
-    d_step += 1
 pygame.quit()

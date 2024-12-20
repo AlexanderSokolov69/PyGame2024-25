@@ -101,8 +101,8 @@ def main():
 
     # Включено ли обновление поля
     time_on = False
-    ticks = 0
-    speed = 10
+    ticks = 20
+    speed = 4
 
     running = True
 
@@ -115,18 +115,18 @@ def main():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                 time_on = not time_on
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
-                speed += 1
+                speed += 0.1
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
-                speed -= 1
+                speed = min(2, speed + 0.1)
 
         screen.fill((0, 0, 0))
         board.render(screen)
-        if ticks >= speed:
+        if ticks >= 10:
             if time_on:
                 board.next_move()
-            ticks = 0
+            ticks = 20
         pygame.display.flip()
-        clock.tick(100)
+        clock.tick(speed)
         ticks += 1
     pygame.quit()
 

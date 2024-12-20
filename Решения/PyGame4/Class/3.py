@@ -94,21 +94,17 @@ class Lines(Board):
         # return dist >= 0
 
     def on_click(self, cell):
-
         x = cell[0]
         y = cell[1]
         if self.selected_cell is None:
-
             if self.board[y][x] == 1:
                 self.selected_cell = x, y
             else:
                 self.board[y][x] = 1
-
         else:
             if self.selected_cell == (x, y):
                 self.selected_cell = None
                 return
-
             x2 = self.selected_cell[0]
             y2 = self.selected_cell[1]
             if self.has_path(x2, y2, x, y):
