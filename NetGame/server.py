@@ -4,8 +4,8 @@ import socket
 from threading import Thread
 import json
 
-HOST, PORT = 'localhost', 8080  # Адрес сервера
-MAX_PLAYERS = 2  # Максимальное кол-во подключений
+HOST, PORT = '172.16.1.33', 5555  # Адрес сервера
+MAX_PLAYERS = 5  # Максимальное кол-во подключений
 
 
 class Server:

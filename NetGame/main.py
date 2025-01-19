@@ -5,7 +5,7 @@ from player import Player
 from client import Client
 
 pygame.init()  # Инициализируем pygame
-HOST, PORT = "localhost", 8080  # Адрес сервера
+HOST, PORT = "172.16.1.33", 5555  # Адрес сервера
 client = Client((HOST, PORT))  # Создаем объект клиента
 sсreen = pygame.display.set_mode((800, 600))  # Создаем окно с разрешением 800x600
 clock = pygame.time.Clock()  # Создаем объект для работы со временем внутри игры
