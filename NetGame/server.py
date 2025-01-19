@@ -76,5 +76,6 @@ class Server:
                 print(self.players)
                 break
 
+
 if __name__ == "__main__":
     server = Server((HOST, PORT), MAX_PLAYERS)
